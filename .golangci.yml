@@ -10,13 +10,14 @@ linters-settings:
     statements: 80
   depguard:
     rules:
-      Main:
+      main:
         files:
           - $all
           - "!$test"
         allow:
           - $gostd
-      Test:
+          - ".*"
+      test:
         files:
           - $test
         allow:
