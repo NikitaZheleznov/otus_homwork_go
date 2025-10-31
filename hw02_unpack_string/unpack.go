@@ -17,7 +17,9 @@ func Unpack(in string) (string, error) {
 		}
 		if runes[i] == '\\' {
 			if i+1 < len(runes) {
-				i++
+				if unicode.IsDigit(runes[i+1]) || runes[i+1] == '\\' {
+					i++
+				}
 			} else {
 				return builder.String(), ErrInvalidString
 			}
