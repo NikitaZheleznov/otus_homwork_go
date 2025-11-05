@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 	"unicode"
@@ -11,12 +12,18 @@ type WordEntity struct {
 	Count int
 }
 
+var re = regexp.MustCompile(`-{2,}`)
+
 func Top10(text string) []string {
 	wordMap := make(map[string]int)
 	for _, word := range strings.Fields(text) {
-		w := strings.ToLower(strings.TrimFunc(word, unicode.IsPunct))
-		if w != "" {
-			wordMap[w]++
+		if re.MatchString(word) {
+			wordMap[word]++
+		} else {
+			w := strings.ToLower(strings.TrimFunc(word, unicode.IsPunct))
+			if w != "" {
+				wordMap[w]++
+			}
 		}
 	}
 	count := 10

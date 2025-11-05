@@ -80,7 +80,7 @@ func TestTop10(t *testing.T) {
 		}
 	})
 
-	t.Run("no words in empty string", func(t *testing.T) {
+	t.Run("test additional task", func(t *testing.T) {
 		require.Equal(t, []string{
 			"что",
 			"думаешь",
@@ -90,5 +90,15 @@ func TestTop10(t *testing.T) {
 			"том",
 			"ты",
 		}, Top10("Что ты думаешь о том, что он сказал"))
+	})
+
+	t.Run("test additional task", func(t *testing.T) {
+		require.Equal(t, []string{
+			"----",
+			"что,что",
+			"что-что",
+			"что...что",
+			"что.что",
+		}, Top10("что,что, что.что!! что-что ---- ---- - что...что"))
 	})
 }
