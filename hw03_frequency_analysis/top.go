@@ -12,7 +12,7 @@ type WordEntity struct {
 	Count int
 }
 
-var re = regexp.MustCompile(`-{2,}`)
+var re = regexp.MustCompile(`^-{2,}`)
 
 func Top10(text string) []string {
 	wordMap := make(map[string]int)
