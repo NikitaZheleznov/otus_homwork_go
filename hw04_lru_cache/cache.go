@@ -33,17 +33,21 @@ func NewCache(capacity int) Cache {
 func (l *lruCache) Set(key Key, value interface{}) bool {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
+
 	if item, exists := l.items[key]; exists {
 		item.Value.(*cacheItem).value = value
 		l.queue.MoveToFront(item)
 		return true
 	}
+
 	cacheElem := &cacheItem{
 		key:   key,
 		value: value,
 	}
+
 	listItem := l.queue.PushFront(cacheElem)
 	l.items[key] = listItem
+
 	if l.queue.Len() > l.capacity {
 		backItem := l.queue.Back()
 		if backItem != nil {
@@ -59,6 +63,7 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 func (l *lruCache) Get(key Key) (interface{}, bool) {
 	l.mutex.Lock()
 	defer l.mutex.Unlock()
+
 	if item, exists := l.items[key]; exists {
 		l.queue.MoveToFront(item)
 		cacheElem := item.Value.(*cacheItem)
