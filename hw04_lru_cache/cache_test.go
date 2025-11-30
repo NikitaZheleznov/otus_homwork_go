@@ -55,6 +55,7 @@ func TestCache(t *testing.T) {
 		c.Set("b", 2)
 		c.Set("c", 3)
 		c.Set("d", 4)
+
 		val, ok := c.Get("a")
 		require.False(t, ok)
 		require.Nil(t, val)
@@ -71,6 +72,7 @@ func TestCache(t *testing.T) {
 		c.Set("a", 11)
 		c.Set("c", 33)
 		c.Set("d", 44)
+
 		val, ok := c.Get("b")
 		require.False(t, ok)
 		require.Nil(t, val)
