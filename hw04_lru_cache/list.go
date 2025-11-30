@@ -67,44 +67,46 @@ func (l *list) PushBack(v interface{}) *ListItem {
 }
 
 func (l *list) Remove(i *ListItem) {
-	if i != nil {
-		if i.Prev != nil {
-			i.Prev.Next = i.Next
-		} else {
-			l.front = i.Next
-		}
-		if i.Next != nil {
-			i.Next.Prev = i.Prev
-		} else {
-			l.back = i.Prev
-		}
-		i.Next = nil
-		i.Prev = nil
-		l.len--
+	if i == nil {
+		return
 	}
+	if i.Prev != nil {
+		i.Prev.Next = i.Next
+	} else {
+		l.front = i.Next
+	}
+	if i.Next != nil {
+		i.Next.Prev = i.Prev
+	} else {
+		l.back = i.Prev
+	}
+	i.Next = nil
+	i.Prev = nil
+	l.len--
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-	if i != nil && i != l.front {
-		if i.Prev != nil {
-			i.Prev.Next = i.Next
-		}
-		if i.Next != nil {
-			i.Next.Prev = i.Prev
-		} else {
-			l.back = i.Prev
-		}
-		if i == l.front {
-			l.front = i.Next
-		}
-		i.Prev = nil
-		i.Next = l.front
-		if l.front != nil {
-			l.front.Prev = i
-		}
-		l.front = i
-		if l.back == nil {
-			l.back = i
-		}
+	if i == nil || i == l.front {
+		return
+	}
+	if i.Prev != nil {
+		i.Prev.Next = i.Next
+	}
+	if i.Next != nil {
+		i.Next.Prev = i.Prev
+	} else {
+		l.back = i.Prev
+	}
+	if i == l.front {
+		l.front = i.Next
+	}
+	i.Prev = nil
+	i.Next = l.front
+	if l.front != nil {
+		l.front.Prev = i
+	}
+	l.front = i
+	if l.back == nil {
+		l.back = i
 	}
 }
