@@ -25,11 +25,19 @@ func process(in In, done In) Out {
 	out := make(Bi)
 	go func() {
 		defer close(out)
-		for v := range in {
+		for {
 			select {
 			case <-done:
 				return
-			case out <- v:
+			case val, ok := <-in:
+				if !ok {
+					return
+				}
+				select {
+				case <-done:
+					return
+				case out <- val:
+				}
 			}
 		}
 	}()
