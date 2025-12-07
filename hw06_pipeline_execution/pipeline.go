@@ -46,7 +46,10 @@ func process(s Stage, done In, inChan In, outChan Bi) {
 }
 
 func drain(ch In) {
-	for range ch {
-		//nolint:revive
+	for {
+		_, ok := <-ch
+		if !ok {
+			return
+		}
 	}
 }
