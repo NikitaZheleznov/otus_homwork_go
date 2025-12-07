@@ -12,20 +12,18 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	if len(stages) == 0 {
 		return in
 	}
-	current := wrapWithDone(in, done)
+	current := process(in, done)
 	for _, stage := range stages {
 		input := current
-		current = wrapWithDone(stage(input), done)
+		current = process(stage(input), done)
 	}
-
 	return current
 }
 
-func wrapWithDone(in In, done In) Out {
+func process(in In, done In) Out {
 	out := make(Bi)
 	go func() {
 		defer close(out)
-
 		for {
 			select {
 			case <-done:
@@ -44,7 +42,6 @@ func wrapWithDone(in In, done In) Out {
 			}
 		}
 	}()
-
 	return out
 }
 
