@@ -17,6 +17,7 @@ linters-settings:
         allow:
           - $gostd
           - ".*"
+          - github.com/cheggaaa/pb/v3
       test:
         files:
           - $test
