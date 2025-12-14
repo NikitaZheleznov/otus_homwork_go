@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -138,15 +137,22 @@ func TestSpecialFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	destFile := filepath.Join(tmpDir, "copy")
 	tmpFile := "temp_target.txt"
-	os.WriteFile(tmpFile, []byte("test"), 0644)
-	defer os.Remove(tmpFile)
-	linkPath := "test_link"
-	err := os.Symlink(tmpFile, linkPath)
+
+	err := os.WriteFile(tmpFile, []byte("test"), 0o644)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		return
+		t.Fatalf("failed to create temp file: %v", err)
+	}
+	defer os.Remove(tmpFile)
+
+	linkPath := "test_link"
+	err = os.Symlink(tmpFile, linkPath)
+	if err != nil {
+		t.Fatalf("failed to create symlink: %v", err)
 	}
 	defer os.Remove(linkPath)
-	errors.Is(Copy(linkPath, destFile, 1000000, 0), ErrUnsupportedFile)
 
+	err = Copy(linkPath, destFile, 1_000_000, 0)
+	if !errors.Is(err, ErrUnsupportedFile) {
+		t.Errorf("expected ErrUnsupportedFile, got: %v", err)
+	}
 }
