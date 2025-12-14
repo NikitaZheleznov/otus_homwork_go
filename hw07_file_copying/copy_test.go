@@ -70,6 +70,14 @@ func TestCopy(t *testing.T) {
 			limit:        1000,
 			expectedFile: "testdata/out_offset6000_limit1000.txt",
 		},
+		{
+			name:         "Copy empty file",
+			fromPath:     testFile,
+			toPath:       "testdata/empty.txt",
+			offset:       0,
+			limit:        0,
+			expectedFile: "testdata/empty.txt",
+		},
 	}
 
 	for _, tc := range tests {

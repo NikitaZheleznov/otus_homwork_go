@@ -32,10 +32,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return fmt.Errorf("failed to get file info: %w", err)
 	}
 
-	if srcInfo.Size() == 0 {
-		return ErrUnsupportedFile
-	}
-
 	if offset > srcInfo.Size() {
 		return ErrOffsetExceedsFileSize
 	}
