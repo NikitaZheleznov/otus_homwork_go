@@ -138,6 +138,7 @@ func TestSpecialFile(t *testing.T) {
 	tmpDir := t.TempDir()
 	destFile := filepath.Join(tmpDir, "copy")
 	tmpFile := "temp_target.txt"
+
 	os.WriteFile(tmpFile, []byte("test"), 0644)
 	defer os.Remove(tmpFile)
 
@@ -149,5 +150,5 @@ func TestSpecialFile(t *testing.T) {
 	}
 	defer os.Remove(linkPath)
 
-	errors.Is(Copy(linkPath, destFile, 1000000, 0), ErrUnsupportedFile)
+	errors.Is(Copy(linkPath, destFile, 0, 0), ErrUnsupportedFile)
 }
