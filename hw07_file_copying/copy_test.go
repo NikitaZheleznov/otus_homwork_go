@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -131,4 +132,21 @@ func TestOffsetMoreThanFileSize(t *testing.T) {
 	destFile := filepath.Join(tmpDir, "copy.txt")
 
 	errors.Is(Copy(input, destFile, 1000000, 0), ErrOffsetExceedsFileSize)
+}
+
+func TestSpecialFile(t *testing.T) {
+	tmpDir := t.TempDir()
+	destFile := filepath.Join(tmpDir, "copy")
+	tmpFile := "temp_target.txt"
+	os.WriteFile(tmpFile, []byte("test"), 0644)
+	defer os.Remove(tmpFile)
+	linkPath := "test_link"
+	err := os.Symlink(tmpFile, linkPath)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+	defer os.Remove(linkPath)
+	errors.Is(Copy(linkPath, destFile, 1000000, 0), ErrUnsupportedFile)
+
 }
