@@ -15,6 +15,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		return 1
 	}
 	prepareEnvironment(env)
+	//#nosec G204
 	command := exec.Command(cmd[0], cmd[1:]...)
 	command.Stdin = os.Stdin
 	command.Stdout = os.Stdout
