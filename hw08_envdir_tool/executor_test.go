@@ -54,9 +54,9 @@ func TestRunCmd(t *testing.T) {
 
 	expectedLines := []string{
 		"HELLO is (\"hello\")",
-		"BAR is (bar)",
-		"FOO is (   foo)",
-		"UNSET is ( /r)",
+		"BAR is (bar\r)",
+		"FOO is (   foo\nwith new line)",
+		"UNSET is ( \r)",
 		"ADDED is (from added)",
 		"EMPTY is ()",
 		"arguments are first second third",
