@@ -24,11 +24,11 @@ func TestReadDir(t *testing.T) {
 	// Проверяем результаты на основе ожидаемого содержимого файлов
 	expected := Environment{
 		"BAR": EnvValue{
-			Value:      "bar\r",
+			Value:      "bar",
 			NeedRemove: false,
 		},
 		"EMPTY": EnvValue{
-			Value:      " \r",
+			Value:      "",
 			NeedRemove: false,
 		},
 		"FOO": EnvValue{
