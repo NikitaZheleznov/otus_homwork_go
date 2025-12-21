@@ -56,9 +56,9 @@ func TestRunCmd(t *testing.T) {
 		"HELLO is (\"hello\")",
 		"BAR is (bar\r)",
 		"FOO is (   foo\nwith new line)",
-		"UNSET is ( \r)",
+		"UNSET is ()",
 		"ADDED is (from added)",
-		"EMPTY is ()",
+		"EMPTY is ( \r)",
 		"arguments are first second third",
 	}
 
