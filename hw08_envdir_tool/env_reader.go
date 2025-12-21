@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -73,7 +74,7 @@ func readEnvFile(filepath string) (EnvValue, error) {
 	reader := bufio.NewReader(file)
 
 	line, err := reader.ReadString('\n')
-	if err != nil && err != io.EOF {
+	if err != nil && errors.Is(err, io.EOF) {
 		return EnvValue{}, err
 	}
 
