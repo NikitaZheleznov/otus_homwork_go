@@ -45,8 +45,8 @@ type (
 	}
 )
 
-func TestValidate(t *testing.T) {
-	tests := getTestCases()
+func TestValidatePositiveCases(t *testing.T) {
+	tests := getTestCasesWithoutErrors()
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("Case %s", tt.name), func(t *testing.T) {
 			testCase := tt
@@ -57,7 +57,19 @@ func TestValidate(t *testing.T) {
 	}
 }
 
-func getTestCases() []testCase {
+func TestValidateNegativeCases(t *testing.T) {
+	tests := getTestCasesWithErrors()
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("Case %s", tt.name), func(t *testing.T) {
+			testCase := tt
+			t.Parallel()
+			err := Validate(testCase.in)
+			runTestCase(t, testCase, err)
+		})
+	}
+}
+
+func getTestCasesWithoutErrors() []testCase {
 	return []testCase{
 		{
 			name: "Valid User struct",
@@ -112,6 +124,37 @@ func getTestCases() []testCase {
 			expectedErr: nil,
 			hasErrors:   false,
 		},
+		{
+			name: "Empty slice in phones",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{},
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "Nil slice in phones",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: nil,
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+	}
+}
+
+func getTestCasesWithErrors() []testCase {
+	return []testCase{
 		{
 			name: "App with invalid version length",
 			in: App{
@@ -219,32 +262,6 @@ func getTestCases() []testCase {
 			},
 			hasErrors: true,
 			errCount:  5,
-		},
-		{
-			name: "Empty slice in phones",
-			in: User{
-				ID:     "12345678-1234-1234-1234-123456789012",
-				Name:   "John Doe",
-				Age:    25,
-				Email:  "test@example.com",
-				Role:   "admin",
-				Phones: []string{},
-			},
-			expectedErr: nil,
-			hasErrors:   false,
-		},
-		{
-			name: "Nil slice in phones",
-			in: User{
-				ID:     "12345678-1234-1234-1234-123456789012",
-				Name:   "John Doe",
-				Age:    25,
-				Email:  "test@example.com",
-				Role:   "admin",
-				Phones: nil,
-			},
-			expectedErr: nil,
-			hasErrors:   false,
 		},
 	}
 }
