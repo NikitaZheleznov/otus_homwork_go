@@ -36,7 +36,7 @@ var (
 	ErrInvalidValidator = errors.New("invalid validator format")
 	ErrUnsupportedType  = errors.New("unsupported field type")
 	ErrInvalidRegexp    = errors.New("invalid regexp pattern")
-	ErrInvalidMinMax    = errors.New("min must be less than max")
+	ErrInvalidMinMax    = errors.New("minValue must be less than maxValue")
 	ErrInvalidSliceType = errors.New("unsupported slice element type")
 )
 
@@ -292,23 +292,23 @@ func validateStringMaxLen(value, ruleValue string) error {
 }
 
 func validateIntMin(value int64, ruleValue string) error {
-	min, err := strconv.ParseInt(ruleValue, 10, 64)
+	minValue, err := strconv.ParseInt(ruleValue, 10, 64)
 	if err != nil {
 		return ErrInvalidValidator
 	}
-	if value < min {
-		return fmt.Errorf("must be at least %d, got %d", min, value)
+	if value < minValue {
+		return fmt.Errorf("must be at least %d, got %d", minValue, value)
 	}
 	return nil
 }
 
 func validateIntMax(value int64, ruleValue string) error {
-	max, err := strconv.ParseInt(ruleValue, 10, 64)
+	maxValue, err := strconv.ParseInt(ruleValue, 10, 64)
 	if err != nil {
 		return ErrInvalidValidator
 	}
-	if value > max {
-		return fmt.Errorf("must be at most %d, got %d", max, value)
+	if value > maxValue {
+		return fmt.Errorf("must be at most %d, got %d", maxValue, value)
 	}
 	return nil
 }
@@ -334,18 +334,18 @@ func validateIntRange(value int64, ruleValue string) error {
 		return ErrInvalidValidator
 	}
 
-	min, err1 := strconv.ParseInt(strings.TrimSpace(parts[0]), 10, 64)
-	max, err2 := strconv.ParseInt(strings.TrimSpace(parts[1]), 10, 64)
+	minValue, err1 := strconv.ParseInt(strings.TrimSpace(parts[0]), 10, 64)
+	maxValue, err2 := strconv.ParseInt(strings.TrimSpace(parts[1]), 10, 64)
 	if err1 != nil || err2 != nil {
 		return ErrInvalidValidator
 	}
 
-	if min >= max {
+	if minValue >= maxValue {
 		return ErrInvalidMinMax
 	}
 
-	if value < min || value > max {
-		return fmt.Errorf("must be between %d and %d, got %d", min, max, value)
+	if value < minValue || value > maxValue {
+		return fmt.Errorf("must be between %d and %d, got %d", minValue, maxValue, value)
 	}
 	return nil
 }
