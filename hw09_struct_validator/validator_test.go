@@ -35,16 +35,30 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
-)
 
-func TestValidate(t *testing.T) {
-	tests := []struct {
+	testCase struct {
 		name        string
 		in          interface{}
 		expectedErr error
 		hasErrors   bool
 		errCount    int
-	}{
+	}
+)
+
+func TestValidate(t *testing.T) {
+	tests := getTestCases()
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("Case %s", tt.name), func(t *testing.T) {
+			testCase := tt
+			t.Parallel()
+			err := Validate(testCase.in)
+			runTestCase(t, testCase, err)
+		})
+	}
+}
+
+func getTestCases() []testCase {
+	return []testCase{
 		{
 			name: "Valid User struct",
 			in: User{
@@ -233,35 +247,26 @@ func TestValidate(t *testing.T) {
 			hasErrors:   false,
 		},
 	}
+}
 
-	for _, tt := range tests {
-		t.Run(fmt.Sprintf("Case %s", tt.name), func(t *testing.T) {
-			testCase := tt
-			t.Parallel()
-			err := Validate(testCase.in)
-			if testCase.expectedErr != nil {
-				if !errors.Is(err, testCase.expectedErr) {
-					t.Errorf("expected error %v, got %v", testCase.expectedErr, err)
-				}
-				return
-			}
-			if testCase.hasErrors {
-				checkHasErrors(t, testCase, err)
-				return
-			} else if err != nil {
-				t.Errorf("unexpected error: %v", err)
-			}
-		})
+func runTestCase(t *testing.T, tc testCase, err error) {
+	t.Helper()
+	if tc.expectedErr != nil {
+		if !errors.Is(err, tc.expectedErr) {
+			t.Errorf("expected error %v, got %v", tc.expectedErr, err)
+		}
+		return
+	}
+	if tc.hasErrors {
+		checkHasErrors(t, tc, err)
+		return
+	}
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
 
-func checkHasErrors(t *testing.T, tc struct {
-	name        string
-	in          interface{}
-	expectedErr error
-	hasErrors   bool
-	errCount    int
-}, err error) {
+func checkHasErrors(t *testing.T, tc testCase, err error) {
 	t.Helper()
 	if err == nil {
 		t.Error("expected validation errors, got nil")

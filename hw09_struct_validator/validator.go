@@ -100,7 +100,7 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
 			reflect.Complex64, reflect.Complex128, reflect.Array, reflect.Chan, reflect.Func,
-			reflect.Interface, reflect.Map, reflect.Pointer | reflect.Ptr,
+			reflect.Interface, reflect.Map, reflect.Pointer,
 			reflect.Slice, reflect.UnsafePointer:
 		default:
 			errs = append(errs, ValidationError{
@@ -130,7 +130,7 @@ func validateSlice(slice reflect.Value, fieldName, validateTag string, errs Vali
 		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
 			reflect.Complex64, reflect.Complex128, reflect.Array, reflect.Chan, reflect.Func,
-			reflect.Interface, reflect.Map, reflect.Pointer | reflect.Ptr,
+			reflect.Interface, reflect.Map, reflect.Pointer,
 			reflect.Slice, reflect.Struct, reflect.UnsafePointer:
 		default:
 			errs = append(errs, ValidationError{
