@@ -97,6 +97,11 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 			if strings.Contains(validateTag, "nested") {
 				errs = validateStruct(fieldValue, fieldName, errs)
 			}
+		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
+			reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
+			reflect.Complex64, reflect.Complex128, reflect.Array, reflect.Chan, reflect.Func,
+			reflect.Interface, reflect.Map, reflect.Pointer | reflect.Ptr,
+			reflect.Slice, reflect.UnsafePointer:
 		default:
 			errs = append(errs, ValidationError{
 				Field: fieldName,
@@ -122,6 +127,11 @@ func validateSlice(slice reflect.Value, fieldName, validateTag string, errs Vali
 			errs = validateString(elem.String(), elemFieldName, validateTag, errs)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			errs = validateInt(elem.Int(), elemFieldName, validateTag, errs)
+		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
+			reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
+			reflect.Complex64, reflect.Complex128, reflect.Array, reflect.Chan, reflect.Func,
+			reflect.Interface, reflect.Map, reflect.Pointer | reflect.Ptr,
+			reflect.Slice, reflect.Struct, reflect.UnsafePointer:
 		default:
 			errs = append(errs, ValidationError{
 				Field: elemFieldName,
