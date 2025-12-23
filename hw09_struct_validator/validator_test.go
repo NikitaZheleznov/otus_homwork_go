@@ -2,6 +2,7 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 )
@@ -38,23 +39,233 @@ type (
 
 func TestValidate(t *testing.T) {
 	tests := []struct {
+		name        string
 		in          interface{}
 		expectedErr error
+		hasErrors   bool
+		errCount    int
 	}{
 		{
-			// Place your code here.
+			name: "Valid User struct",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"12345678901", "10987654321"},
+			},
+			expectedErr: nil,
+			hasErrors:   false,
 		},
-		// ...
-		// Place your code here.
+		{
+			name: "Valid App struct",
+			in: App{
+				Version: "1.0.0",
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "Valid Response struct",
+			in: Response{
+				Code: 200,
+				Body: "OK",
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "Token struct without validation tags",
+			in: Token{
+				Header:    []byte("header"),
+				Payload:   []byte("payload"),
+				Signature: []byte("signature"),
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "Pointer to valid User",
+			in: &User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "stuff",
+				Phones: []string{"12345678901"},
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "App with invalid version length",
+			in: App{
+				Version: "1.0",
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "Response with invalid code",
+			in: Response{
+				Code: 400,
+				Body: "Bad Request",
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid ID length",
+			in: User{
+				ID:     "invalid",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"12345678901"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid age (too young)",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    16,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"12345678901"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid age (too old)",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    51,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"12345678901"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid email",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "invalid",
+				Role:   "admin",
+				Phones: []string{"12345678901"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid role",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "invalid",
+				Phones: []string{"12345678901"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with invalid phone length",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"123"},
+			},
+			hasErrors: true,
+			errCount:  1,
+		},
+		{
+			name: "User with multiple errors",
+			in: User{
+				ID:     "invalid",
+				Name:   "John Doe",
+				Age:    15,
+				Email:  "invalid",
+				Role:   "invalid",
+				Phones: []string{"123"},
+			},
+			hasErrors: true,
+			errCount:  5,
+		},
+		{
+			name: "Empty slice in phones",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{},
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
+		{
+			name: "Nil slice in phones",
+			in: User{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: nil,
+			},
+			expectedErr: nil,
+			hasErrors:   false,
+		},
 	}
 
-	for i, tt := range tests {
-		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
-			tt := tt
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("Case %s", tt.name), func(t *testing.T) {
+			testCase := tt
 			t.Parallel()
-
-			// Place your code here.
-			_ = tt
+			err := Validate(testCase.in)
+			if testCase.expectedErr != nil {
+				if !errors.Is(err, testCase.expectedErr) {
+					t.Errorf("expected error %v, got %v", testCase.expectedErr, err)
+				}
+				return
+			}
+			if testCase.hasErrors {
+				if err == nil {
+					t.Error("expected validation errors, got nil")
+					return
+				}
+				var valErrs ValidationErrors
+				if !errors.As(err, &valErrs) {
+					t.Errorf("expected ValidationErrors, got %T: %v", err, err)
+					return
+				}
+				if testCase.errCount > 0 && len(valErrs) != testCase.errCount {
+					t.Errorf("expected %d validation errors, got %d", testCase.errCount, len(valErrs))
+					for i, ve := range valErrs {
+						t.Errorf("  error %d: %s - %v", i, ve.Field, ve.Err)
+					}
+				}
+			} else {
+				if err != nil {
+					t.Errorf("unexpected error: %v", err)
+				}
+			}
 		})
 	}
 }
