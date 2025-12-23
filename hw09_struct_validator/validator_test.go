@@ -246,26 +246,36 @@ func TestValidate(t *testing.T) {
 				return
 			}
 			if testCase.hasErrors {
-				if err == nil {
-					t.Error("expected validation errors, got nil")
-					return
-				}
-				var valErrs ValidationErrors
-				if !errors.As(err, &valErrs) {
-					t.Errorf("expected ValidationErrors, got %T: %v", err, err)
-					return
-				}
-				if testCase.errCount > 0 && len(valErrs) != testCase.errCount {
-					t.Errorf("expected %d validation errors, got %d", testCase.errCount, len(valErrs))
-					for i, ve := range valErrs {
-						t.Errorf("  error %d: %s - %v", i, ve.Field, ve.Err)
-					}
-				}
-			} else {
-				if err != nil {
-					t.Errorf("unexpected error: %v", err)
-				}
+				checkHasErrors(t, testCase, err)
+				return
+			} else if err != nil {
+				t.Errorf("unexpected error: %v", err)
 			}
 		})
+	}
+}
+
+func checkHasErrors(t *testing.T, tc struct {
+	name        string
+	in          interface{}
+	expectedErr error
+	hasErrors   bool
+	errCount    int
+}, err error) {
+	t.Helper()
+	if err == nil {
+		t.Error("expected validation errors, got nil")
+		return
+	}
+	var valErrs ValidationErrors
+	if !errors.As(err, &valErrs) {
+		t.Errorf("expected ValidationErrors, got %T: %v", err, err)
+		return
+	}
+	if tc.errCount > 0 && len(valErrs) != tc.errCount {
+		t.Errorf("expected %d validation errors, got %d", tc.errCount, len(valErrs))
+		for i, ve := range valErrs {
+			t.Errorf("  error %d: %s - %v", i, ve.Field, ve.Err)
+		}
 	}
 }
