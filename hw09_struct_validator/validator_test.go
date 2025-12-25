@@ -21,6 +21,16 @@ type (
 		meta   json.RawMessage //nolint:unused
 	}
 
+	UserWithErrors struct {
+		ID     string `json:"id" validate:"len:test"`
+		Name   string
+		Age    int             `validate:"min:18|max:50"`
+		Email  string          `validate:"regexp:^\\w+@\\w+\\.\\w+$"`
+		Role   UserRole        `validate:"in:admin,stuff"`
+		Phones []string        `validate:"len:11"`
+		meta   json.RawMessage //nolint:unused
+	}
+
 	App struct {
 		Version string `validate:"len:5"`
 	}
@@ -155,6 +165,20 @@ func getTestCasesWithoutErrors() []testCase {
 
 func getTestCasesWithErrors() []testCase {
 	return []testCase{
+		{
+			name: "Not validation error",
+			in: UserWithErrors{
+				ID:     "12345678-1234-1234-1234-123456789012",
+				Name:   "John Doe",
+				Age:    25,
+				Email:  "test@example.com",
+				Role:   "admin",
+				Phones: []string{"12345678901", "10987654321"},
+			},
+			hasErrors:   true,
+			expectedErr: ErrInvalidValidator,
+			errCount:    1,
+		},
 		{
 			name: "App with invalid version length",
 			in: App{
