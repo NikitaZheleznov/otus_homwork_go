@@ -53,11 +53,9 @@ func Validate(v interface{}) error {
 	var validationErrors ValidationErrors
 	var err error
 	validationErrors, err = validateStruct(val, "", validationErrors)
-
 	if err != nil {
 		return err
 	}
-
 	if len(validationErrors) == 0 {
 		return nil
 	}
@@ -81,8 +79,8 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 			fieldName = parentField + "." + fieldName
 		}
 
-		validateTag := field.Tag.Get("validate")
-		if validateTag == "" {
+		tag := field.Tag.Get("validate")
+		if tag == "" {
 			if fieldValue.Kind() == reflect.Struct && field.Type.Name() != "time.Time" {
 				errs, err = validateStruct(fieldValue, fieldName, errs)
 				if err != nil {
@@ -93,7 +91,7 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 		}
 
 		if fieldValue.Kind() == reflect.Slice {
-			errs, err = validateSlice(fieldValue, fieldName, validateTag, errs)
+			errs, err = validateSlice(fieldValue, fieldName, tag, errs)
 			if err != nil {
 				return nil, err
 			}
@@ -102,11 +100,11 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 
 		switch fieldValue.Kind() {
 		case reflect.String:
-			errs, err = validateString(fieldValue.String(), fieldName, validateTag, errs)
+			errs, err = validateString(fieldValue.String(), fieldName, tag, errs)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			errs, err = validateInt(fieldValue.Int(), fieldName, validateTag, errs)
+			errs, err = validateInt(fieldValue.Int(), fieldName, tag, errs)
 		case reflect.Struct:
-			if strings.Contains(validateTag, "nested") {
+			if strings.Contains(tag, "nested") {
 				errs, err = validateStruct(fieldValue, fieldName, errs)
 			}
 		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
@@ -125,7 +123,7 @@ func validateStruct(val reflect.Value, parentField string, errs ValidationErrors
 	return errs, nil
 }
 
-func validateSlice(slice reflect.Value, fieldName, validateTag string, errs ValidationErrors) (ValidationErrors, error) {
+func validateSlice(slice reflect.Value, fieldName, tag string, errs ValidationErrors) (ValidationErrors, error) {
 	var err error
 	if slice.Len() == 0 {
 		return errs, nil
@@ -137,9 +135,9 @@ func validateSlice(slice reflect.Value, fieldName, validateTag string, errs Vali
 
 		switch elem.Kind() {
 		case reflect.String:
-			errs, err = validateString(elem.String(), elemFieldName, validateTag, errs)
+			errs, err = validateString(elem.String(), elemFieldName, tag, errs)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			errs, err = validateInt(elem.Int(), elemFieldName, validateTag, errs)
+			errs, err = validateInt(elem.Int(), elemFieldName, tag, errs)
 		case reflect.Invalid, reflect.Bool, reflect.Uint, reflect.Uint8, reflect.Uint16,
 			reflect.Uint32, reflect.Uint64, reflect.Uintptr, reflect.Float32, reflect.Float64,
 			reflect.Complex64, reflect.Complex128, reflect.Array, reflect.Chan, reflect.Func,
@@ -156,8 +154,8 @@ func validateSlice(slice reflect.Value, fieldName, validateTag string, errs Vali
 	return errs, nil
 }
 
-func validateString(value, fieldName, validateTag string, errs ValidationErrors) (ValidationErrors, error) {
-	validators := strings.Split(validateTag, "|")
+func validateString(value, fieldName, tag string, errs ValidationErrors) (ValidationErrors, error) {
+	validators := strings.Split(tag, "|")
 
 	for _, validator := range validators {
 		validator = strings.TrimSpace(validator)
@@ -185,7 +183,7 @@ func validateString(value, fieldName, validateTag string, errs ValidationErrors)
 		case "regexp":
 			validationError, err = validateStringRegexp(value, ruleValue)
 		case "in":
-			validationError, err = validateStringIn(value, ruleValue)
+			validationError = validateStringIn(value, ruleValue)
 		case "minLen":
 			validationError, err = validateStringMinLen(value, ruleValue)
 		case "maxLen":
@@ -207,8 +205,8 @@ func validateString(value, fieldName, validateTag string, errs ValidationErrors)
 	return errs, nil
 }
 
-func validateInt(value int64, fieldName, validateTag string, errs ValidationErrors) (ValidationErrors, error) {
-	validators := strings.Split(validateTag, "|")
+func validateInt(value int64, fieldName, tag string, errs ValidationErrors) (ValidationErrors, error) {
+	validators := strings.Split(tag, "|")
 
 	for _, validator := range validators {
 		validator = strings.TrimSpace(validator)
@@ -278,14 +276,14 @@ func validateStringRegexp(value, ruleValue string) (*ValidationError, error) {
 	return nil, nil
 }
 
-func validateStringIn(value, ruleValue string) (*ValidationError, error) {
+func validateStringIn(value, ruleValue string) *ValidationError {
 	allowedValues := strings.Split(ruleValue, ",")
 	for _, allowed := range allowedValues {
 		if value == strings.TrimSpace(allowed) {
-			return nil, nil
+			return nil
 		}
 	}
-	return &ValidationError{Err: fmt.Errorf("must be one of: %s", ruleValue)}, nil
+	return &ValidationError{Err: fmt.Errorf("must be one of: %s", ruleValue)}
 }
 
 func validateStringMinLen(value, ruleValue string) (*ValidationError, error) {
