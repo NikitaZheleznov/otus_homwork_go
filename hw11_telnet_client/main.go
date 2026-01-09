@@ -33,17 +33,25 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	defer client.Close()
+	errCh := make(chan error, 2)
 
 	go func() {
 		if err := client.Send(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			errCh <- err
 		}
 	}()
 
-	if err := client.Receive(); err != nil {
+	go func() {
+		if err := client.Receive(); err != nil {
+			errCh <- err
+		}
+	}()
+
+	err := <-errCh
+	client.Close()
+
+	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
-		client.Close()
 		os.Exit(1)
 	}
 }
