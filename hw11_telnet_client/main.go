@@ -43,6 +43,7 @@ func main() {
 
 	if err := client.Receive(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		client.Close()
 		os.Exit(1)
 	}
 }

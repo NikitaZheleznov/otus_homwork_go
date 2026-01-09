@@ -39,7 +39,7 @@ func TestTelnetClient(t *testing.T) {
 
 			err = client.Receive()
 			require.NoError(t, err)
-			require.Equal(t, "world\n", out.String())
+			require.Equal(t, "world\ntest\n", out.String())
 		}()
 
 		go func() {
@@ -56,6 +56,9 @@ func TestTelnetClient(t *testing.T) {
 			require.Equal(t, "hello\n", string(request)[:n])
 
 			n, err = conn.Write([]byte("world\n"))
+			require.NoError(t, err)
+			require.NotEqual(t, 0, n)
+			n, err = conn.Write([]byte("test\n"))
 			require.NoError(t, err)
 			require.NotEqual(t, 0, n)
 		}()

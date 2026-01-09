@@ -59,20 +59,33 @@ func (t *telnetClient) Close() error {
 
 func (t *telnetClient) Send() error {
 	scanner := bufio.NewScanner(t.in)
-	if scanner.Scan() {
+	for scanner.Scan() {
+
 		text := scanner.Text() + "\n"
-		_, err := t.conn.Write([]byte(text))
+		t.conn.SetWriteDeadline(time.Now().Add(t.timeout))
+		if _, err := t.conn.Write([]byte(text)); err != nil {
+			return err
+		}
+	}
+	if err := scanner.Err(); err != nil {
 		return err
 	}
-	return scanner.Err()
+	return nil
 }
 
 func (t *telnetClient) Receive() error {
 	reader := bufio.NewReader(t.conn)
-	line, err := reader.ReadString('\n')
-	if err != nil {
-		return err
+	for {
+		t.conn.SetReadDeadline(time.Now().Add(t.timeout))
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
+		}
+		if _, err := t.out.Write([]byte(line)); err != nil {
+			return err
+		}
 	}
-	_, err = t.out.Write([]byte(line))
-	return err
 }
