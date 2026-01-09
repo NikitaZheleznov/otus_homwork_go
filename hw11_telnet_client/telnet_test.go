@@ -63,3 +63,22 @@ func TestTelnetClient(t *testing.T) {
 		wg.Wait()
 	})
 }
+
+func TestTelnetClientTimeout(t *testing.T) {
+	t.Run("timed out", func(t *testing.T) {
+		l, err := net.Listen("tcp", "127.0.0.1:")
+		require.NoError(t, err)
+		require.NoError(t, l.Close())
+
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		timeout, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+
+		client := NewTelnetClient(l.Addr().String(), timeout, io.NopCloser(in), out)
+		err = client.Connect()
+		require.Error(t, err)
+
+	})
+}
