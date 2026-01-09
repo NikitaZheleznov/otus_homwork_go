@@ -7,9 +7,7 @@ import (
 	"time"
 )
 
-var (
-	timeoutFlag = flag.Duration("timeout", 10*time.Second, "connection timeout")
-)
+var timeoutFlag = flag.Duration("timeout", 10*time.Second, "connection timeout")
 
 func main() {
 	flag.Parse()

@@ -82,6 +82,5 @@ func TestTelnetClientTimeout(t *testing.T) {
 		client := NewTelnetClient(l.Addr().String(), timeout, io.NopCloser(in), out)
 		err = client.Connect()
 		require.Error(t, err)
-
 	})
 }

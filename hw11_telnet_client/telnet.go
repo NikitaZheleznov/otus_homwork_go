@@ -60,7 +60,6 @@ func (t *telnetClient) Close() error {
 func (t *telnetClient) Send() error {
 	scanner := bufio.NewScanner(t.in)
 	for scanner.Scan() {
-
 		text := scanner.Text() + "\n"
 		t.conn.SetWriteDeadline(time.Now().Add(t.timeout))
 		if _, err := t.conn.Write([]byte(text)); err != nil {
