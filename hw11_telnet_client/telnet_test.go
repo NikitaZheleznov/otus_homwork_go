@@ -39,7 +39,7 @@ func TestTelnetClient(t *testing.T) {
 
 			err = client.Receive()
 			require.NoError(t, err)
-			require.Equal(t, "world\n", out.String())
+			require.Equal(t, "world\ntest\n", out.String())
 		}()
 
 		go func() {
@@ -58,8 +58,29 @@ func TestTelnetClient(t *testing.T) {
 			n, err = conn.Write([]byte("world\n"))
 			require.NoError(t, err)
 			require.NotEqual(t, 0, n)
+			n, err = conn.Write([]byte("test\n"))
+			require.NoError(t, err)
+			require.NotEqual(t, 0, n)
 		}()
 
 		wg.Wait()
+	})
+}
+
+func TestTelnetClientTimeout(t *testing.T) {
+	t.Run("timed out", func(t *testing.T) {
+		l, err := net.Listen("tcp", "127.0.0.1:")
+		require.NoError(t, err)
+		require.NoError(t, l.Close())
+
+		in := &bytes.Buffer{}
+		out := &bytes.Buffer{}
+
+		timeout, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+
+		client := NewTelnetClient(l.Addr().String(), timeout, io.NopCloser(in), out)
+		err = client.Connect()
+		require.Error(t, err)
 	})
 }
