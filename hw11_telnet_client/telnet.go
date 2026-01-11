@@ -4,9 +4,6 @@ import (
 	"bufio"
 	"io"
 	"net"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 )
 
@@ -40,13 +37,6 @@ func (t *telnetClient) Connect() error {
 	if err != nil {
 		return err
 	}
-	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, syscall.SIGINT)
-		<-sigChan
-		t.conn.Close()
-	}()
-
 	return nil
 }
 
