@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -31,25 +33,44 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	errCh := make(chan error, 2)
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT)
+
+	exitChan := make(chan struct{})
+	errorChan := make(chan error, 2)
+
+	go func() {
+		select {
+		case <-sigChan:
+			fmt.Fprintln(os.Stderr, "...Interrupted")
+			close(exitChan)
+		case <-errorChan:
+			return
+		}
+	}()
 
 	go func() {
 		if err := client.Send(); err != nil {
-			errCh <- err
+			errorChan <- err
+		} else {
+			close(exitChan)
 		}
 	}()
 
 	go func() {
 		if err := client.Receive(); err != nil {
-			errCh <- err
+			errorChan <- err
+		} else {
+			close(exitChan)
 		}
 	}()
 
-	err := <-errCh
-	client.Close()
-
-	if err != nil {
+	select {
+	case err := <-errorChan:
 		fmt.Fprintln(os.Stderr, err)
+		client.Close()
 		os.Exit(1)
+	case <-exitChan:
 	}
 }
